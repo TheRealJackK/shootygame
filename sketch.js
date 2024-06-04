@@ -146,6 +146,10 @@ function detectCollision() {
 			healthPoints = healthPoints + 0.5
 			score = Math.trunc(score + healthPoints / 4 * zombieSpeed)
         }
+
+		if(zombie.collides(hitbox)) {
+			background('salmon')
+		}
     });
 
 	// Check for projectile collision with zombies
@@ -160,6 +164,10 @@ function detectCollision() {
 			healthPoints = healthPoints + 0.5
 			score = Math.trunc(score + healthPoints / 4 * humanSpeed)
         }
+
+		if(human.collides(hitbox)) {
+			background('salmon')
+		}
     });
 
 	// Check if projectile missed and leaves the screen
@@ -251,10 +259,12 @@ function gameScreen() {
 function endScreen() {
 	background('grey')
 
-	text('Score', width / 2, height / 4)
-	text(score,  width / 2, height / 2)
 	textAlign('center')
 	textSize(50)
+	text('Score', width / 2, height / 4)
+	text(score,  width / 2, height / 2)
+	textSize(30)
+	text('Reload Page To Restart', width / 2, height / 1.5 )
 
 	crosshair.opacity = 0
 	player.opacity = 0

@@ -1,10 +1,12 @@
-let crosshair, projectile, hitbox, zombies, humans, player, enemyCount
+let crosshair, projectile, hitbox, zombies, humans, player, enemyCount, ammoSprite
+
+let map1 // Map File
+
+let road, rSide, lSide, grass // Tiles
 
 let screen = 0
 
 let projectiles = 15
-
-let reloading = false
 
 let zombieSpeed = 0.5
 
@@ -14,8 +16,61 @@ let healthPoints = 10
 
 let score = 0
 
+function preload() {
+	map1 = loadStrings('maps/map1.txt')
+}
+
 function setup() {
 	new Canvas(500, 500);
+	
+	// Grass Tiles
+	grass = new Group();
+	grass.layer = 3
+	grass.opacity = 0
+	grass.collider = 'none'
+	grass.w = width / 8;
+	grass.h = height / 8;
+	grass.tile = '1'
+	grass.image = 'assets/grass.png'
+
+	// Road left Tiles
+	lSide = new Group();
+	lSide.layer = 3
+	lSide.opacity = 0
+	lSide.collider = 'none';
+	lSide.w = width / 8;
+	lSide.h = height / 8;
+	lSide.tile = '2';
+	lSide.image = 'assets/road-left.png'
+
+	// Road right Tiles
+	rSide = new Group();
+	rSide.layer = 3
+	rSide.opacity = 0
+	rSide.collider = 'none';
+	rSide.w = width / 8;
+	rSide.h = height / 8;
+	rSide.tile = '3';
+	rSide.image = 'assets/road-right.png'
+	
+	// Road Tiles
+	road = new Group();
+	road.layer = 3
+	road.opacity = 0
+	road.collider = 'none';
+	road.w = width / 8;
+	road.h = height / 8;
+	road.tile = '4'
+	road.image = 'assets/road.png'
+
+	// Draw Tiles
+    tilesGroup = new Tiles(
+        map1,
+        30,
+        60,
+        grass.w,
+        grass.h,
+    );
 
 	crosshair = new Sprite();
 	crosshair.diameter = 5;
@@ -24,22 +79,31 @@ function setup() {
 	crosshair.collider = 'none'
 
 	player = new Sprite()
-	player.layer = 2;
-	player.image = 'assets/player.png'
+	player.layer = 3;
+	player.image = 'assets/playerx64.png'
 	player.opacity = 0
 	player.diameter = 20;
 	player.x = width / 2
-	player.y = 475;
+	player.y = 465;
 	player.collider = 'static'
 
 	hitbox = new Sprite()
-	hitbox.layer = 1;
+	hitbox.layer = 2;
 	hitbox.opacity = 0
 	hitbox.stroke = 'none'
 	hitbox.diameter = 50;
 	hitbox.x = player.x
 	hitbox.y = player.y
 	hitbox.collider = 'static'
+
+	ammoSprite = new Sprite();
+	ammoSprite.color = 'none'
+	ammoSprite.stroke = 'none'
+	ammoSprite.layer = 5
+	ammoSprite.opacity = 0
+	ammoSprite.w = 20
+	ammoSprite.h = 15
+	ammoSprite.collider = 'none'
 
 	projectile = new Sprite();
 	projectile.color = 'black';
@@ -48,14 +112,15 @@ function setup() {
 	projectile.y = player.y +50;
 
 	zombies = new Group();
+	zombies.image = 'assets/zombie-slow.png'
 
 	humans = new Group();
-
+	humans.image = 'assets/zombie-fast.png'
 }
 
 function draw() {
-
 	// Game screen switching
+	background('grey')
 
 	// Check if health points are 0 before ending game
     if (healthPoints <= 0) {
@@ -84,11 +149,19 @@ function displayValues() {
 	text(projectiles, 195, 20)
 
 	// Display Ammunition Status on Player
+	ammoSprite.x = player.x + 30
+	ammoSprite.y = player.y - 30
+	ammoSprite.opacity = 1
 	if(projectiles > 0) {
-		text(projectiles, player.x, player.y - 30)
+		ammoSprite.text = projectiles;
+		ammoSprite.w = 20
 	} else {
-		text('Reloading', player.x, player.y - 30)
+		ammoSprite.text = 'Reloading'
+		ammoSprite.x = player.x + 50
+		ammoSprite.w = 60;
 	}
+	
+
 
 	// Enemy Count
 	text('Enemies: ', 275, 20)
@@ -99,11 +172,7 @@ function displayValues() {
 	text(score, 470, 20)
 }
 
-function gunPlay() {
-	// Change sprite opacity
-	crosshair.opacity = 1
-	player.opacity = 1    
-	
+function gunPlay() {    
 	// Move player sprite with mouse
 	player.x = mouse.x
 	hitbox.x = mouse.x
@@ -117,7 +186,7 @@ function gunPlay() {
 		projectiles = projectiles - 1
 
 		// Place projectile in front of player
-		projectile.y = player.y -20;
+		projectile.y = player.y -30;
 		projectile.x = player.x
 
 		// Add velocity to fire the projectile
@@ -125,7 +194,6 @@ function gunPlay() {
 
 		// Reload
 		if(projectiles == 0) {
-			reloading == true;
 			setTimeout(() => {
 				projectiles = projectiles + 15
 			}, 1000)
@@ -148,7 +216,13 @@ function detectCollision() {
         }
 
 		if(zombie.collides(hitbox)) {
-			background('salmon')
+			background('red')
+			
+			// Change tile opacity
+			grass.opacity = 0
+			lSide.opacity = 0
+			rSide.opacity = 0
+			road.opacity = 0
 		}
     });
 
@@ -167,6 +241,12 @@ function detectCollision() {
 
 		if(human.collides(hitbox)) {
 			background('salmon')
+
+			// Change tile opacity
+			grass.opacity = 0
+			lSide.opacity = 0
+			rSide.opacity = 0
+			road.opacity = 0
 		}
     });
 
@@ -182,9 +262,9 @@ function detectCollision() {
 function spawnEnemies(group, count, speed) {
     for (let i = 0; i < count; i++) {
         let enemy = new Sprite();
-        enemy.diameter = 20;
+        enemy.diameter = 50;
         enemy.x = random(50, width - 50);
-        enemy.y = random(50, height / 2);
+        enemy.y = random(50, height / 4);
         enemy.speed = speed;
         group.add(enemy);
     }
@@ -195,16 +275,18 @@ function moveEnemies() {
 	if(zombies.length === 0 && humans.length === 0) {
 		spawnEnemies(zombies, 5, zombieSpeed);
         spawnEnemies(humans, 5, humanSpeed);
-        zombieSpeed += 0.1;
-        humanSpeed += 0.1;
+        zombieSpeed += 0.05;
+        humanSpeed += 0.05;
 	}
 
 	// Move zombies towards the player
     zombies.forEach(zombie => {
         let zombieAngle = atan2(player.y - zombie.y, player.x - zombie.x);
-		zombie.color = 'red'
         zombie.vel.x = cos(zombieAngle) * zombieSpeed;
         zombie.vel.y = sin(zombieAngle) * zombieSpeed;
+
+		// Set sprite
+		zombie.image = 'assets/zombie-slow.png'
 
 		// Remove enemy if hits player and decrement health point
 		if(zombie.collides(hitbox)) {
@@ -218,9 +300,11 @@ function moveEnemies() {
 	// Move humans towards the player
 	humans.forEach(human => {
 		let humanAngle = atan2(player.y - human.y, player.x - human.x);
-		human.color = 'gray'
         human.vel.x = cos(humanAngle) * humanSpeed;
         human.vel.y = sin(humanAngle) * humanSpeed;
+
+		// Set sprite
+		human.image = 'assets/zombie-fast.png'
 
 		// Remove enemy if hits player and decrement health point
 		if(human.collides(hitbox)) {
@@ -245,15 +329,23 @@ function menuScreen() {
 }
 
 function gameScreen() {
-	background('skyblue');
-
 	displayValues();
+
+	// Change sprite opacity
+	crosshair.opacity = 1
+	player.opacity = 1
+
+	// Change tile opacity
+	grass.opacity = 1
+	lSide.opacity = 1
+	rSide.opacity = 1
+	road.opacity = 1
 
 	gunPlay();
 
 	detectCollision();
 
-	moveEnemies()
+	moveEnemies();
 }
 
 function endScreen() {
@@ -268,4 +360,13 @@ function endScreen() {
 
 	crosshair.opacity = 0
 	player.opacity = 0
+	ammoSprite.opacity = 0
+	zombies.remove()
+	humans.remove()
+	
+	// Change tile opacity
+	grass.opacity = 0
+	lSide.opacity = 0
+	rSide.opacity = 0
+	road.opacity = 0
 }

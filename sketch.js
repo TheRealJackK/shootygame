@@ -16,7 +16,7 @@ let humanSpeed = 1
 
 let healthPoints = 10
 
-let score = 5000
+let score = 0
 
 function preload() {
 	map1 = loadStrings('maps/map1.txt')

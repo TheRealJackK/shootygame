@@ -16,7 +16,7 @@ let humanSpeed = 1
 
 let healthPoints = 10
 
-let score = 0
+let score = 5000
 
 function preload() {
 	map1 = loadStrings('maps/map1.txt')
@@ -238,23 +238,19 @@ function gunPlay() {
 		}
 
 		// Reload
-		if(ammoCount == 0 && score < 5000) {
+		if(ammoCount == 0) {
 			setTimeout(() => {
-				ammoCount = ammoCount + 15
+				if(score >= 5000) {
+					ammoCount = ammoCount + 20
+				} else if(score >= 10000) {
+					ammoCount = ammoCount + 25
+				} else if(score >= 20000) {
+					ammoCount = ammoCount + 30
+				} else {
+					ammoCount = ammoCount + 15
+				}
 			}, 1000)
-		} else if(ammoCount == 0 && score >= 10000) {
-			setTimeout(() => {
-				ammoCount = ammoCount + 20
-			}, 1000)
-		} else if(ammoCount == 0 && score >= 15000) {
-			setTimeout(() => {
-				ammoCount = ammoCount + 25
-			}, 1000)
-		} else if(ammoCount == 0 && score >= 20000) {
-			setTimeout(() => {
-				ammoCount = ammoCount + 30
-			}, 1000)
-		}
+		} 
 
 		// Bullet casing
 		bulletCasing.y = player.y - 10

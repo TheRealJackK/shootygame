@@ -6,5 +6,5 @@ Needs to be run on a live server until game is hosted, cannot run through openin
 
 Credits:
 
-Coding, Assets: Jack King
-Coding help, Feedback: Guy Briggs
+Coding, Assets: Jack King.
+Coding help, Feedback: Guy Briggs.

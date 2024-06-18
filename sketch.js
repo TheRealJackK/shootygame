@@ -6,7 +6,7 @@ let road, rSide, lSide, grass // Tiles
 
 let screen = 0
 
-let projectile, projectile2, projectile3
+let projectiles
 
 let ammoCount = 15
 
@@ -16,14 +16,25 @@ let humanSpeed = 1
 
 let healthPoints = 10
 
-let score = 0
+let score = 20000
 
 function preload() {
 	map1 = loadStrings('maps/map1.txt')
+	loadImage('assets/playerx64.png')
+	loadImage('assets/crosshair.png')
+	loadImage('assets/bullet.png')
+	loadImage('assets/bullet-casing.png')
+	loadImage('assets/zombie-slow.png')
+	loadImage('assets/zombie-fast.png')
+	loadImage('assets/grass.png')
+	loadImage('assets/road.png')
+	loadImage('assets/road-left.png')
+	loadImage('assets/road-right.png')
 }
 
 function setup() {
-	new Canvas(1500, 900);
+	// new Canvas(1500, 900);
+	createCanvas(1500, 900);
 
 	// Tile Groups
 	
@@ -115,24 +126,13 @@ function setup() {
 	ammoSprite.collider = 'none'
 	ammoSprite.textSize = 20
 
-	// Projectiles
-	projectile = new Sprite();
-	projectile.image = 'assets/bullet.png';
-	projectile.diameter = 10;
-	projectile.x = player.x;
-	projectile.y = player.y + 100;
-
-	projectile2 = new Sprite();
-	projectile2.image = 'assets/bullet.png';
-	projectile2.diameter = 10;
-	projectile2.x = player.x;
-	projectile2.y = player.y + 100;
-
-	projectile3 = new Sprite();
-	projectile3.image = 'assets/bullet.png';
-	projectile3.diameter = 10;
-	projectile3.x = player.x;
-	projectile3.y = player.y + 100;
+	// Projectiles Group
+	projectiles = new Group()
+	projectiles.image = 'assets/bullet.png';
+	projectiles.diameter = 10;
+	projectiles.life = 27.5
+	projectiles.y = player.y - 30
+	projectiles.vel.y = -20
 
 	// Bullet casing
 	bulletCasing = new Sprite();
@@ -218,39 +218,31 @@ function gunPlay() {
 		// Remove 1 ammo
 		ammoCount = ammoCount - 1
 
-		// Place projectile in front of player
-		projectile.y = player.y -30;
-		projectile.x = player.x
-		// Add velocity to fire the projectile
-		projectile.vel.y = -20;
-
-		// Add extra projectiles if score reaches 10000
-		if(score >= 5000) {
-			projectile2.y = player.y - 30
-			projectile2.x = player.x + 10
-			projectile2.vel.y = -20
-			projectile2.vel.x = 5
-			
-			projectile3.y = player.y - 30
-			projectile3.x = player.x - 10
-			projectile3.vel.y = -20
-			projectile3.vel.x = -5
+		// Creating projectiles
+		if(score <= 5000) {
+			// Create new projectile in group
+			let newProjectile = new projectiles.Sprite()
+			// Move projecile in accordance to player
+			newProjectile.x = player.x
+		} else if (score >= 5000) { // Create multiple projectiles as the score rises
+			let newProjectile = new projectiles.Sprite()
+			newProjectile.x = player.x
+			// Second Projectile
+			let newProjectile1 = new projectiles.Sprite()
+			newProjectile1.x = player.x -7
+			newProjectile1.vel.x = -2
+			// Third Projectile
+			let newProjectile2 = new projectiles.Sprite()
+			newProjectile2.x = player.x +7
+			newProjectile2.vel.x = +2
 		}
 
-		// Reload
+		// Automatic Reload
 		if(ammoCount == 0) {
 			setTimeout(() => {
-				if(score >= 5000) {
-					ammoCount = ammoCount + 20
-				} else if(score >= 10000) {
-					ammoCount = ammoCount + 25
-				} else if(score >= 20000) {
-					ammoCount = ammoCount + 30
-				} else {
-					ammoCount = ammoCount + 15
-				}
+				ammoCount = ammoCount + 15
 			}, 1000)
-		} 
+		}
 
 		// Bullet casing
 		bulletCasing.y = player.y - 10
@@ -261,64 +253,15 @@ function gunPlay() {
 			bulletCasing.vel.y = 3
 		}
 	}
-
-	// Check if projectile missed and leaves the screen
-	if(projectile.y <= 0) {
-		projectile.y = player.y + 100;
-		projectile.x = player.x
-		projectile.vel.y = 0;
-		projectile.vel.x = 0;
-	}
-
-	if(projectile2.y <= 0) {
-		projectile2.y = player.y + 100;
-		projectile2.x = player.x
-		projectile2.vel.y = 0;
-		projectile2.vel.x = 0;
-	}
-
-	if(projectile3.y <= 0) {
-		projectile3.y = player.y + 100;
-		projectile3.x = player.x
-		projectile3.vel.y = 0;
-		projectile3.vel.x = 0;
-	}
 }
 
 function detectCollision() {
 	// Check for projectile collision with zombies
     zombies.forEach(zombie => {
-        if (projectile.collides(zombie)) {
+        if (projectiles.overlaps(zombie)) {
             zombie.remove(); // Remove zombie on collision
-            projectile.y = player.y + 100;
-            projectile.x = player.x;
-			projectile.vel.y = 0;
-			projectile.vel.x = 0;
-
-			healthPoints = healthPoints + 0.5
-			score = Math.trunc(score + healthPoints / 4 * zombieSpeed)
-        }
-
-		if (projectile2.collides(zombie)) {
-            zombie.remove(); // Remove zombie on collision
-            projectile2.y = player.y + 100;
-            projectile2.x = player.x;
-			projectile2.vel.y = 0;
-			projectile2.vel.x = 0;
-
-			healthPoints = healthPoints + 0.5
-			score = Math.trunc(score + healthPoints / 4 * zombieSpeed)
-        }
-
-		if (projectile3.collides(zombie)) {
-            zombie.remove(); // Remove zombie on collision
-            projectile3.y = player.y + 100;
-            projectile3.x = player.x;
-			projectile3.vel.y = 0;
-			projectile3.vel.x = 0;
-
-			healthPoints = healthPoints + 0.5
-			score = Math.trunc(score + healthPoints / 4 * zombieSpeed)
+			healthPoints = healthPoints + 0.25 // Add health points
+			score = Math.trunc(score + healthPoints / 4 * zombieSpeed) // Add score
         }
 
 		if(zombie.collides(hitbox)) {
@@ -334,37 +277,10 @@ function detectCollision() {
 
 	// Check for projectile collision with zombies
     humans.forEach(human => {
-        if (projectile.collides(human)) {
+        if (projectiles.overlaps(human)) {
             human.remove(); // Remove zombie on collision
-            projectile.y = player.y + 100;
-            projectile.x = player.x;
-			projectile.vel.y = 0;
-			projectile.vel.x = 0;
-
-			healthPoints = healthPoints + 0.5
-			score = Math.trunc(score + healthPoints / 4 * humanSpeed)
-        }
-
-		if (projectile2.collides(human)) {
-            human.remove(); // Remove zombie on collision
-            projectile2.y = player.y + 100;
-            projectile2.x = player.x;
-			projectile2.vel.y = 0;
-			projectile2.vel.x = 0;
-
-			healthPoints = healthPoints + 0.5
-			score = Math.trunc(score + healthPoints / 4 * humanSpeed)
-        }
-
-		if (projectile3.collides(human)) {
-            human.remove(); // Remove zombie on collision
-            projectile3.y = player.y + 100;
-            projectile3.x = player.x;
-			projectile3.vel.y = 0;
-			projectile3.vel.x = 0;
-
-			healthPoints = healthPoints + 0.5
-			score = Math.trunc(score + healthPoints / 4 * humanSpeed)
+			healthPoints = healthPoints + 0.25 // Add health points
+			score = Math.trunc(score + healthPoints / 4 * humanSpeed) // Add score
         }
 
 		if(human.collides(hitbox)) {
@@ -396,8 +312,8 @@ function moveEnemies() {
 	if(zombies.length === 0 && humans.length === 0) {
 		spawnEnemies(zombies, 5, zombieSpeed);
         spawnEnemies(humans, 5, humanSpeed);
-        zombieSpeed += 0.05;
-        humanSpeed += 0.05;
+        zombieSpeed += 0.1;
+        humanSpeed += 0.1;
 
 		// Spawn more enemies as the score gets higher
 		if(score >= 1000) {
@@ -405,20 +321,19 @@ function moveEnemies() {
 			spawnEnemies(humans, 1, zombieSpeed);
 
 			if (score >= 5000) {
-				spawnEnemies(zombies, 2, zombieSpeed);
-				spawnEnemies(humans, 1, zombieSpeed);
+				spawnEnemies(zombies, 5, zombieSpeed);
+				spawnEnemies(humans, 3, zombieSpeed);
 
 				if (score >= 10000) {
-					spawnEnemies(zombies, 3, zombieSpeed);
-					spawnEnemies(humans, 2, zombieSpeed);
+					spawnEnemies(zombies, 7, zombieSpeed);
+					spawnEnemies(humans, 5, zombieSpeed);
 
 					if (score >= 20000) {
-						spawnEnemies(zombies, 3, zombieSpeed);
-						spawnEnemies(humans, 3, zombieSpeed);
+						spawnEnemies(zombies, 10, zombieSpeed);
+						spawnEnemies(humans, 5, zombieSpeed);
 					}
 				}
 			}
-
 		} 
 	}
 

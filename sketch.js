@@ -213,45 +213,12 @@ function gunPlay() {
 	crosshair.y = mouseY;
 
 	// Shooting mechanic
-	if(mouse.pressed() && ammoCount > 0) {
-
-		// Remove 1 ammo
-		ammoCount = ammoCount - 1
-
-		// Creating projectiles
-		if(score <= 5000) {
-			// Create new projectile in group
-			let newProjectile = new projectiles.Sprite()
-			// Move projecile in accordance to player
-			newProjectile.x = player.x
-		} else if (score >= 5000) { // Create multiple projectiles as the score rises
-			let newProjectile = new projectiles.Sprite()
-			newProjectile.x = player.x
-			// Second Projectile
-			let newProjectile1 = new projectiles.Sprite()
-			newProjectile1.x = player.x -7
-			newProjectile1.vel.x = -2
-			// Third Projectile
-			let newProjectile2 = new projectiles.Sprite()
-			newProjectile2.x = player.x +7
-			newProjectile2.vel.x = +2
-		}
-
-		// Automatic Reload
-		if(ammoCount == 0) {
-			setTimeout(() => {
-				ammoCount = ammoCount + 15
-			}, 1000)
-		}
-
-		// Bullet casing
-		bulletCasing.y = player.y - 10
-		bulletCasing.x = player.x + 10
-		bulletCasing.vel.y = -2
-		bulletCasing.vel.x = 2
-		if(bulletCasing.y >= height / 10) {
-			bulletCasing.vel.y = 3
-		}
+	if(score <= 5000) {
+		starterWeapon()
+	} else if(score <= 20000) {
+		shotgunUpgrade()
+	} else if(score >= 20000) {
+		akUpgrade()
 	}
 }
 
@@ -264,14 +231,14 @@ function detectCollision() {
 			score = Math.trunc(score + healthPoints / 4 * zombieSpeed) // Add score
         }
 
-		if(zombie.collides(hitbox)) {
+		if(zombie.colliding(hitbox)) {
 			background('red')
 			
 			// Change tile opacity
-			grass.opacity = 0
-			lSide.opacity = 0
-			rSide.opacity = 0
-			road.opacity = 0
+			grass.opacity = 0.4
+			lSide.opacity = 0.4
+			rSide.opacity = 0.4
+			road.opacity = 0.4
 		}
     });
 
@@ -283,14 +250,14 @@ function detectCollision() {
 			score = Math.trunc(score + healthPoints / 4 * humanSpeed) // Add score
         }
 
-		if(human.collides(hitbox)) {
-			background('salmon')
+		if(human.colliding(hitbox)) {
+			background('red')
 
 			// Change tile opacity
-			grass.opacity = 0
-			lSide.opacity = 0
-			rSide.opacity = 0
-			road.opacity = 0
+			grass.opacity = 0.4
+			lSide.opacity = 0.4
+			rSide.opacity = 0.4
+			road.opacity = 0.4
 		}
     });
 }
@@ -331,6 +298,16 @@ function moveEnemies() {
 					if (score >= 20000) {
 						spawnEnemies(zombies, 10, zombieSpeed);
 						spawnEnemies(humans, 5, zombieSpeed);
+
+						if(score >= 50000) {
+							spawnEnemies(zombies, 20, zombieSpeed);
+							spawnEnemies(humans, 10, zombieSpeed);
+
+							if(score >= 200000) {
+								spawnEnemies(zombies, 50, zombieSpeed);
+								spawnEnemies(humans, 25, zombieSpeed);
+							}
+						}
 					}
 				}
 			}
@@ -431,4 +408,107 @@ function endScreen() {
 	lSide.opacity = 0
 	rSide.opacity = 0
 	road.opacity = 0
+}
+
+function starterWeapon() {
+	if(mouse.pressed() && ammoCount > 0) {
+		// Remove 1 ammo
+		ammoCount = ammoCount - 1
+		// Create new projectile in group
+		let newProjectile = new projectiles.Sprite()
+		// Move projecile in accordance to player
+		newProjectile.x = player.x
+
+		// Automatic Reload
+		if(ammoCount <= 0) {
+			setTimeout(() => {
+				ammoCount = ammoCount + 15
+			}, 1000)
+		}
+
+		// Bullet casing
+		bulletCasing.y = player.y - 10
+		bulletCasing.x = player.x + 10
+		bulletCasing.vel.y = -2
+		bulletCasing.vel.x = 2
+		if(bulletCasing.y >= height / 10) {
+			bulletCasing.vel.y = 3
+		}
+	}
+}
+
+function shotgunUpgrade() {
+	if(mouse.pressed() && ammoCount > 0) {
+		// Change player sprite
+		player.image = 'assets/player-shotgun.png'
+
+		// Remove 3 ammo
+		ammoCount = ammoCount - 1
+
+		// Change range
+		projectiles.life = 20;
+
+		// Projectile
+		let newProjectile = new projectiles.Sprite()
+		newProjectile.x = player.x
+		
+		// Second Projectile
+		let newProjectile1 = new projectiles.Sprite()
+		newProjectile1.x = player.x -7
+		newProjectile1.vel.x = -2
+		
+		// Third Projectile
+		let newProjectile2 = new projectiles.Sprite()
+		newProjectile2.x = player.x +7
+		newProjectile2.vel.x = +2
+
+		// Automatic Reload
+		if(ammoCount <= 0) {
+			setTimeout(() => {
+				ammoCount = ammoCount + 8
+			}, 1500)
+		}
+
+		// Bullet casing
+		bulletCasing.y = player.y - 10
+		bulletCasing.x = player.x + 10
+		bulletCasing.vel.y = -2
+		bulletCasing.vel.x = 2
+		if(bulletCasing.y >= height / 10) {
+			bulletCasing.vel.y = 3
+		}
+	}
+}
+
+function akUpgrade() {
+	// Change player sprite
+	player.image = 'assets/player-ak.png'
+
+	if(mouse.pressing() && ammoCount > 0) {
+		// Remove 1 ammo
+		ammoCount = ammoCount - 1
+
+		// Change range
+		projectiles.life = 35;
+		
+		// Projectile
+		let newProjectile = new projectiles.Sprite()
+		newProjectile.x = player.x
+
+		// Automatic Reload
+		if(ammoCount <= 0) {
+			setTimeout(() => {
+				ammoCount = ammoCount + 30
+			}, 2500)
+		}
+
+		// Bullet casing
+		bulletCasing.y = player.y - 10
+		bulletCasing.x = player.x + 10
+		bulletCasing.vel.y = -2
+		bulletCasing.vel.x = 2
+		if(bulletCasing.y >= height / 10) {
+			bulletCasing.vel.y = 3
+		}
+	}
 }

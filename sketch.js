@@ -130,15 +130,14 @@ function setup() {
 	projectiles = new Group()
 	projectiles.image = 'assets/bullet.png';
 	projectiles.diameter = 10;
-	projectiles.life = 27.5
+	projectiles.life = 22
 	projectiles.y = player.y - 30
-	projectiles.vel.y = -20
+	projectiles.vel.y = -25
 
 	// Bullet casing
-	bulletCasing = new Sprite();
+	bulletCasing = new Group();
 	bulletCasing.image = 'assets/bullet-casing.png'
-	bulletCasing.x = player.x 
-	bulletCasing.y = player.y + 90
+	bulletCasing.life = 30;
 	bulletCasing.collider = 'none'
 	bulletCasing.rotation = 360;
 	bulletCasing.rotationSpeed = 10;
@@ -217,8 +216,10 @@ function gunPlay() {
 		starterWeapon()
 	} else if(score <= 20000) {
 		shotgunUpgrade()
-	} else if(score >= 20000) {
+	} else if(score <= 100000) {
 		akUpgrade()
+	} else if(score >= 100000) {
+		doubleAkUpgrade()
 	}
 }
 
@@ -279,8 +280,8 @@ function moveEnemies() {
 	if(zombies.length === 0 && humans.length === 0) {
 		spawnEnemies(zombies, 5, zombieSpeed);
         spawnEnemies(humans, 5, humanSpeed);
-        zombieSpeed += 0.1;
-        humanSpeed += 0.1;
+        zombieSpeed += 0.07;
+        humanSpeed += 0.07;
 
 		// Spawn more enemies as the score gets higher
 		if(score >= 1000) {
@@ -288,24 +289,24 @@ function moveEnemies() {
 			spawnEnemies(humans, 1, zombieSpeed);
 
 			if (score >= 5000) {
-				spawnEnemies(zombies, 5, zombieSpeed);
-				spawnEnemies(humans, 3, zombieSpeed);
+				spawnEnemies(zombies, 3, zombieSpeed);
+				spawnEnemies(humans, 1, zombieSpeed);
 
 				if (score >= 10000) {
-					spawnEnemies(zombies, 7, zombieSpeed);
-					spawnEnemies(humans, 5, zombieSpeed);
+					spawnEnemies(zombies, 5, zombieSpeed);
+					spawnEnemies(humans, 3, zombieSpeed);
 
 					if (score >= 20000) {
-						spawnEnemies(zombies, 10, zombieSpeed);
+						spawnEnemies(zombies, 7, zombieSpeed);
 						spawnEnemies(humans, 5, zombieSpeed);
 
 						if(score >= 50000) {
-							spawnEnemies(zombies, 20, zombieSpeed);
-							spawnEnemies(humans, 10, zombieSpeed);
+							spawnEnemies(zombies, 10, zombieSpeed);
+							spawnEnemies(humans, 7, zombieSpeed);
 
 							if(score >= 200000) {
-								spawnEnemies(zombies, 50, zombieSpeed);
-								spawnEnemies(humans, 25, zombieSpeed);
+								spawnEnemies(zombies, 20, zombieSpeed);
+								spawnEnemies(humans, 15, zombieSpeed);
 							}
 						}
 					}
@@ -426,14 +427,7 @@ function starterWeapon() {
 			}, 1000)
 		}
 
-		// Bullet casing
-		bulletCasing.y = player.y - 10
-		bulletCasing.x = player.x + 10
-		bulletCasing.vel.y = -2
-		bulletCasing.vel.x = 2
-		if(bulletCasing.y >= height / 10) {
-			bulletCasing.vel.y = 3
-		}
+		spawnBulletCasing()
 	}
 }
 
@@ -446,7 +440,7 @@ function shotgunUpgrade() {
 		ammoCount = ammoCount - 1
 
 		// Change range
-		projectiles.life = 20;
+		projectiles.life = 15;
 
 		// Projectile
 		let newProjectile = new projectiles.Sprite()
@@ -469,14 +463,7 @@ function shotgunUpgrade() {
 			}, 1500)
 		}
 
-		// Bullet casing
-		bulletCasing.y = player.y - 10
-		bulletCasing.x = player.x + 10
-		bulletCasing.vel.y = -2
-		bulletCasing.vel.x = 2
-		if(bulletCasing.y >= height / 10) {
-			bulletCasing.vel.y = 3
-		}
+		spawnBulletCasing()
 	}
 }
 
@@ -489,7 +476,7 @@ function akUpgrade() {
 		ammoCount = ammoCount - 1
 
 		// Change range
-		projectiles.life = 35;
+		projectiles.life = 30;
 		
 		// Projectile
 		let newProjectile = new projectiles.Sprite()
@@ -498,17 +485,51 @@ function akUpgrade() {
 		// Automatic Reload
 		if(ammoCount <= 0) {
 			setTimeout(() => {
-				ammoCount = ammoCount + 30
+				ammoCount = ammoCount + 60
 			}, 2500)
 		}
 
-		// Bullet casing
-		bulletCasing.y = player.y - 10
-		bulletCasing.x = player.x + 10
-		bulletCasing.vel.y = -2
-		bulletCasing.vel.x = 2
-		if(bulletCasing.y >= height / 10) {
-			bulletCasing.vel.y = 3
-		}
+		spawnBulletCasing()
 	}
+}
+
+function doubleAkUpgrade() {
+	// Change player sprite
+	player.image = 'assets/player-doubleak.png'
+	
+	if(mouse.pressing() && ammoCount > 0) {
+		// Remove 1 ammo
+		ammoCount = ammoCount - 1
+
+		// Change range
+		projectiles.life = 35;
+		
+		// Projectile
+		let newProjectile = new projectiles.Sprite()
+		newProjectile.x = player.x - 12.5
+
+		// Second projectile
+		let newProjectile2 = new projectiles.Sprite()
+		newProjectile2.x = player.x + 12.5
+
+
+		// Automatic Reload
+		if(ammoCount <= 0) {
+			setTimeout(() => {
+				ammoCount = ammoCount + 120
+			}, 3000)
+		}
+
+		spawnBulletCasing()
+	}
+}
+
+function spawnBulletCasing() {
+	// Bullet casing
+	let newBulletCasing = new bulletCasing.Sprite()
+
+	newBulletCasing.y = player.y - 10
+	newBulletCasing.x = player.x + 10
+	newBulletCasing.vel.y = -2
+	newBulletCasing.vel.x = 2	
 }

@@ -22,7 +22,7 @@ let humanSpeed = 1
 
 let healthPoints = 10
 
-let bossHealth = 10
+let bossHealth
 
 let bossSpeed = 0.1
 
@@ -224,7 +224,7 @@ function displayValues() {
 
 	// Display Bosses Health Bar
 	bossHealthBar.w = 200
-	bossHealthBar.h = 50
+	bossHealthBar.h = 20
 	if(bossHealth > 0) {
 		bossHealthBar.x = width / 2
 		bossHealthBar.y = 100;
@@ -415,6 +415,10 @@ function moveEnemies() {
 
 		// Set sprite
 		newBoss.image = 'assets/zombie-boss.png'
+
+		// Place health bar above boss
+		bossHealthBar.x = newBoss.x
+		bossHealthBar.y = newBoss.y - 120
 	})
 }
 
@@ -520,8 +524,8 @@ function progressRound() {
 		spawnEnemies(humans, healthPoints / 8, humanSpeed, fastZombieSprites);
 		
 		// Increase speed every round
-		zombieSpeed = zombieSpeed + 0.03
-		humanSpeed = humanSpeed + 0.03
+		zombieSpeed = zombieSpeed + 0.045
+		humanSpeed = humanSpeed + 0.045
 
 	}
 
@@ -576,8 +580,10 @@ function endScreen() {
 
 	textAlign('center')
 	textSize(50)
-	text('Score', width / 2, height / 4)
-	text(score,  width / 2, height / 2)
+	text('Score', width / 2, height / 8)
+	text(score,  width / 2, height / 5)
+	text('Rounds Completed', width / 2, height / 4)
+	text(roundNum, width / 2, height / 2)
 	textSize(30)
 	text('Reload Page To Restart', width / 2, height / 1.5 )
 

@@ -10,17 +10,19 @@ let projectiles
 
 let ammoCount = 15
 
+let fastZombieSprites
+
+let slowZombieSprites
+
 let zombieSpeed = 0.5
 
 let humanSpeed = 1
 
 let healthPoints = 10
 
-let bossActive = false
-
 let bossHealth = 10
 
-let bossSpeed = 0.25
+let bossSpeed = 0.1
 
 let score = 0
 
@@ -30,8 +32,10 @@ function preload() {
 	loadImage('assets/crosshair.png')
 	loadImage('assets/bullet.png')
 	loadImage('assets/bullet-casing.png')
-	loadImage('assets/zombie-slow.png')
-	loadImage('assets/zombie-fast.png')
+	loadImage('assets/zombie-slow.png', 'assets/zombie-slow-2.png', 'assets/zombie-slow-3.png', 'assets/zombie-slow-4.png')
+	loadImage('assets/zombie-fast.png', 'assets/zombie-fast-2.png', 'assets/zombie-fast-3.png', 'assets/zombie-fast-4.png')
+	fastZombieSprites = ['assets/zombie-slow.png', 'assets/zombie-slow-2.png', 'assets/zombie-slow-3.png', 'assets/zombie-slow-4.png']
+	slowZombieSprites = ['assets/zombie-fast.png', 'assets/zombie-fast-2.png', 'assets/zombie-fast-3.png', 'assets/zombie-fast-4.png']
 	loadImage('assets/grass.png')
 	loadImage('assets/road.png')
 	loadImage('assets/road-left.png')
@@ -158,13 +162,10 @@ function setup() {
 
 	// Enemy Groups
 	zombies = new Group();
-	zombies.image = 'assets/zombie-slow.png'
 
 	humans = new Group();
-	humans.image = 'assets/zombie-fast.png'
 
 	boss = new Group()
-	boss.image = 'assets/zombie-boss.png'
 }
 
 function draw() {
@@ -249,260 +250,6 @@ function gunPlay() {
 	}
 }
 
-function detectCollision() {
-	// Check for projectile collision with zombies
-    zombies.forEach(zombie => {
-        if (projectiles.overlaps(zombie)) {
-            zombie.remove(); // Remove zombie on collision
-			healthPoints = healthPoints + 0.25 // Add health points
-			score = Math.trunc(score + healthPoints / 4 * zombieSpeed) // Add score
-        }
-
-		// Remove enemy if hits player and decrement health point
-		if(zombie.collides(hitbox)) {
-			zombie.remove()
-
-			background('red')
-			
-			// Change tile opacity
-			grass.opacity = 0.4
-			lSide.opacity = 0.4
-			rSide.opacity = 0.4
-			road.opacity = 0.4
-			
-			//Remove health points if ememy hits player
-			healthPoints = healthPoints -1;
-		}
-    });
-
-	// Check for projectile collision with zombies
-    humans.forEach(human => {
-        if (projectiles.overlaps(human)) {
-            human.remove(); // Remove zombie on collision
-			healthPoints = healthPoints + 0.25 // Add health points
-			score = Math.trunc(score + healthPoints / 4 * humanSpeed) // Add score
-        }
-
-		// Remove enemy if hits player and decrement health point
-		if(human.collides(hitbox)) {
-			human.remove()
-
-			background('red')
-
-			// Change tile opacity
-			grass.opacity = 0.4
-			lSide.opacity = 0.4
-			rSide.opacity = 0.4
-			road.opacity = 0.4
-
-			//Remove health points if ememy hits player
-			healthPoints = healthPoints - 1;
-		}
-    });
-
-	boss.forEach(newBoss => {
-		if(projectiles.collides(newBoss)) {
-			// Remove health points from boss
-			bossHealth = bossHealth - 1
-			// Remove boss when health is depleted
-			if(bossHealth <= 0 && bossActive == true) {
-				newBoss.remove()
-				bossHealthBar.opacity = 0
-				bossActive = false
-				bossHealth = bossHealth + healthPoints / 2
-				score = score + 1000
-			}
-		}
-
-		if(newBoss.collides(hitbox)) {
-
-			background('red')
-
-			// Change tile opacity
-			grass.opacity = 0.4
-			lSide.opacity = 0.4
-			rSide.opacity = 0.4
-			road.opacity = 0.4
-
-			//Remove health points if ememy hits player
-			healthPoints = healthPoints - 1;
-		}
-	})
-}
-
-function spawnEnemies(group, count, speed) {
-    for (let i = 0; i < count; i++) {
-        let enemy = new Sprite();
-        enemy.diameter = 50;
-        enemy.x = random(50, width - 50);
-        enemy.y = random(50, height / 4 + 100);
-        enemy.speed = speed;
-		enemy.layer = 3
-        group.add(enemy);
-    }
-}
-
-function spawnBoss(group, count, speed) {
-    for (let i = 0; i < count; i++) {
-        let bossEnemy = new Sprite();
-        bossEnemy.diameter = 200;
-        bossEnemy.x = random(50, width - 50);
-        bossEnemy.y = 100;
-        bossEnemy.speed = speed;
-		bossEnemy.layer = 3
-		group.add(bossEnemy);
-    }
-}
-
-function moveEnemies() {
-	// Spawn and Respawn function
-	if(zombies.length === 0 && humans.length === 0) {
-		spawnEnemies(zombies, 5, zombieSpeed);
-        spawnEnemies(humans, 5, humanSpeed);
-        zombieSpeed += 0.03;
-        humanSpeed += 0.03;
-
-		// Spawn more enemies as the score gets higher
-		if(score >= 1000) {
-			spawnEnemies(zombies, 1, zombieSpeed);
-			spawnEnemies(humans, 1, zombieSpeed);
-
-			if (score >= 5000) {
-				spawnEnemies(zombies, 3, zombieSpeed);
-				spawnEnemies(humans, 1, zombieSpeed);
-
-				if (score >= 10000) {
-					spawnEnemies(zombies, 5, zombieSpeed);
-					spawnEnemies(humans, 3, zombieSpeed);
-
-					if (score >= 20000) {
-						spawnEnemies(zombies, 7, zombieSpeed);
-						spawnEnemies(humans, 5, zombieSpeed);
-
-						if(score >= 50000) {
-							spawnEnemies(zombies, 10, zombieSpeed);
-							spawnEnemies(humans, 7, zombieSpeed);
-
-							if(score >= 200000) {
-								spawnEnemies(zombies, 20, zombieSpeed);
-								spawnEnemies(humans, 15, zombieSpeed);
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-
-	if(score >= 1000 && score <= 1100 && bossActive == false) {
-		spawnBoss(boss, 1, bossSpeed)
-		bossHealthBar.opacity = 1
-		bossActive = true;
-	} else if(score >= 10000 && score <= 11000 && bossActive == false) {
-		spawnBoss(boss, 1, bossSpeed)
-		bossHealthBar.opacity = 1
-		bossActive = true;
-	} else if(score >= 50000 && score <= 52500 && bossActive == false) {
-		spawnBoss(boss, 1, bossSpeed)
-		bossHealthBar.opacity = 1
-		bossActive = true;
-	} else if(score >= 150000 && score <= 155000 && bossActive == false) {
-		spawnBoss(boss, 1, bossSpeed)
-		bossHealthBar.opacity = 1
-		bossActive = true;		
-	}
-
-	// Move zombies towards the player
-    zombies.forEach(zombie => {
-        let zombieAngle = atan2(player.y - zombie.y, player.x - zombie.x);
-        zombie.vel.x = cos(zombieAngle) * zombieSpeed;
-        zombie.vel.y = sin(zombieAngle) * zombieSpeed;
-
-		// Set sprite
-		zombie.image = 'assets/zombie-slow.png'
-    });
-
-	// Move humans towards the player
-	humans.forEach(human => {
-		let humanAngle = atan2(player.y - human.y, player.x - human.x);
-        human.vel.x = cos(humanAngle) * humanSpeed;
-        human.vel.y = sin(humanAngle) * humanSpeed;
-
-		// Set sprite
-		human.image = 'assets/zombie-fast.png'
-	})
-
-	// Move boss towards the player
-	boss.forEach(newBoss => {
-		let bossAngle = atan2(player.y - newBoss.y, player.x - newBoss.x);
-		newBoss.vel.x = cos(bossAngle) * zombieSpeed;
-        newBoss.vel.y = sin(bossAngle) * zombieSpeed;
-
-		// Set sprite
-		newBoss.image = 'assets/zombie-boss.png'
-
-	})
-}
-
-function menuScreen() {
-	background('grey')
-
-	text('Press Space To Start', width / 2, height / 2)
-	textAlign('center')
-	textSize(30)
-
-	if(kb.presses(' ')) {
-		screen = 1
-	}
-}
-
-function gameScreen() {
-	displayValues();
-
-	cursor('none')
-
-	// Change sprite opacity
-	crosshair.opacity = 1
-	player.opacity = 1
-
-	// Change tile opacity
-	grass.opacity = 1
-	lSide.opacity = 1
-	rSide.opacity = 1
-	road.opacity = 1
-
-	gunPlay();
-
-	detectCollision();
-
-	moveEnemies();
-}
-
-function endScreen() {
-	background('grey')
-
-	cursor(ARROW)
-
-	textAlign('center')
-	textSize(50)
-	text('Score', width / 2, height / 4)
-	text(score,  width / 2, height / 2)
-	textSize(30)
-	text('Reload Page To Restart', width / 2, height / 1.5 )
-
-	crosshair.opacity = 0
-	player.opacity = 0
-	ammoSprite.opacity = 0
-	zombies.remove()
-	humans.remove()
-	
-	// Change tile opacity
-	grass.opacity = 0
-	lSide.opacity = 0
-	rSide.opacity = 0
-	road.opacity = 0
-}
-
 function starterWeapon() {
 	if(mouse.pressed() && ammoCount > 0) {
 		// Remove 1 ammo
@@ -531,27 +278,19 @@ function shotgunUpgrade() {
 		// Remove 3 ammo
 		ammoCount = ammoCount - 1
 
-		// Change range
-		// projectiles.life = 15;
-
 		// Projectile
-		let newProjectile = new projectiles.Sprite()
-		newProjectile.x = player.x
-		
-		// Second Projectile
-		let newProjectile1 = new projectiles.Sprite()
-		newProjectile1.x = player.x -7
-		newProjectile1.vel.x = -2
-		
-		// Third Projectile
-		let newProjectile2 = new projectiles.Sprite()
-		newProjectile2.x = player.x +7
-		newProjectile2.vel.x = +2
+		for (let i = 0; i < 8; i++) {
+			let newProjectile = new projectiles.Sprite()
+			newProjectile.amount = 8;
+			newProjectile.x = player.x
+			newProjectile.vel.x = random(-15, 15)
+			newProjectile.vel.y = random(-25, -20)
+		}
 
 		// Automatic Reload
 		if(ammoCount <= 0) {
 			setTimeout(() => {
-				ammoCount = ammoCount + 8
+				ammoCount = ammoCount + 12
 			}, 1500)
 		}
 
@@ -624,4 +363,266 @@ function spawnBulletCasing() {
 	newBulletCasing.x = player.x + 10
 	newBulletCasing.vel.y = -2
 	newBulletCasing.vel.x = 2	
+}
+
+function spawnEnemies(group, count, speed, spriteArray) {
+    for (let i = 0; i < count; i++) {
+        let enemy = new Sprite();
+        enemy.diameter = 50;
+        enemy.x = random(50, width - 50);
+        enemy.y = random(50, height / 4 + 100);
+        enemy.speed = speed;
+		enemy.image = random(spriteArray);
+		enemy.layer = 3
+        group.add(enemy);
+    }
+}
+
+function spawnBoss(group, count, speed) {
+    for (let i = 0; i < count; i++) {
+        let bossEnemy = new Sprite();
+        bossEnemy.diameter = 200;
+        bossEnemy.x = random(50, width - 50);
+        bossEnemy.y = 100;
+        bossEnemy.speed = speed;
+		bossEnemy.layer = 3
+		group.add(bossEnemy);
+    }
+}
+
+function moveEnemies() {
+
+	// Spawn and Respawn function
+	if(zombies.length === 0 && humans.length === 0) {
+		spawnEnemies(zombies, 5, zombieSpeed, slowZombieSprites);
+		spawnEnemies(humans, 5, humanSpeed, fastZombieSprites);
+		// Increase speed every round
+		zombieSpeed = zombieSpeed + 0.03
+		humanSpeed = humanSpeed + 0.03
+		// Spawn more enemies as the score gets higher
+		if(score >= 1000) {
+			spawnEnemies(zombies, 2, zombieSpeed, slowZombieSprites);
+			spawnEnemies(humans, 2, humanSpeed, fastZombieSprites);
+		}
+		if(score >= 5000) {
+			spawnEnemies(zombies, 5, zombieSpeed, slowZombieSprites);
+			spawnEnemies(humans, 3, humanSpeed, fastZombieSprites);
+		}
+		if(score >= 15000) {
+			spawnEnemies(zombies, 10, zombieSpeed, slowZombieSprites);
+			spawnEnemies(humans, 5, humanSpeed, fastZombieSprites);
+		}
+		if(score >= 30000) {
+			spawnEnemies(zombies, 15, zombieSpeed, slowZombieSprites);
+			spawnEnemies(humans, 10, humanSpeed, fastZombieSprites);
+		}
+		if(score >= 50000) {
+			spawnEnemies(zombies, 20, zombieSpeed, slowZombieSprites);
+			spawnEnemies(humans, 10, humanSpeed, fastZombieSprites);
+		}
+		if(score >= 75000) {
+			spawnEnemies(zombies, 25, zombieSpeed, slowZombieSprites);
+			spawnEnemies(humans, 15, humanSpeed, fastZombieSprites);
+		}
+		if(score >= 100000) {
+			spawnEnemies(zombies, 35, zombieSpeed, slowZombieSprites);
+			spawnEnemies(humans, 20, humanSpeed, fastZombieSprites);
+		}
+		if(score >= 150000) {
+			spawnEnemies(zombies, 50, zombieSpeed, slowZombieSprites);
+			spawnEnemies(humans, 30, humanSpeed, fastZombieSprites);
+		}
+	}
+
+	// Spawn in the bosses as the score gets higher
+	if(score >= 1000 && score <= 1100 && boss.length == 0) {
+		spawnBoss(boss, 1, bossSpeed)
+		bossHealthBar.opacity = 1
+	} else if(score >= 10000 && score <= 11000 && boss.length == 0) {
+		spawnBoss(boss, 1, bossSpeed)
+		bossHealth = healthPoints / 2
+		bossHealthBar.opacity = 1
+	} else if(score >= 50000 && score <= 52500 && boss.length == 0) {
+		spawnBoss(boss, 1, bossSpeed)
+		bossHealth = healthPoints / 2
+		bossHealthBar.opacity = 1
+	} else if(score >= 150000 && score <= 155000 && boss.length == 0) { 
+		spawnBoss(boss, 1, bossSpeed)
+		bossHealth = healthPoints / 2
+		bossHealthBar.opacity = 1
+	} else if(score >= 300000 && score <= 325000 && boss.length == 0) {
+		spawnBoss(boss, 1, bossSpeed)
+		bossHealth = healthPoints / 2
+		bossHealthBar.opacity = 1
+	} else if(score >= 500000 && score <= 525000 && boss.length == 0) {
+		spawnBoss(boss, 1, bossSpeed)
+		bossHealth = healthPoints / 2
+		bossHealthBar.opacity = 1
+	}
+
+	// Move zombies towards the player
+    zombies.forEach(zombie => {
+        let zombieAngle = atan2(player.y - zombie.y, player.x - zombie.x);
+        zombie.vel.x = cos(zombieAngle) * zombieSpeed;
+        zombie.vel.y = sin(zombieAngle) * zombieSpeed;
+    });
+
+	// Move humans towards the player
+	humans.forEach(human => {
+		let humanAngle = atan2(player.y - human.y, player.x - human.x);
+        human.vel.x = cos(humanAngle) * humanSpeed;
+        human.vel.y = sin(humanAngle) * humanSpeed;
+	})
+
+	// Move boss towards the player
+	boss.forEach(newBoss => {
+		let bossAngle = atan2(player.y - newBoss.y, player.x - newBoss.x);
+		newBoss.vel.x = cos(bossAngle) * zombieSpeed;
+        newBoss.vel.y = sin(bossAngle) * zombieSpeed;
+
+		// Set sprite
+		newBoss.image = 'assets/zombie-boss.png'
+	})
+}
+
+function detectCollision() {
+	// Check for projectile collision with zombies
+    zombies.forEach(zombie => {
+        if (projectiles.overlaps(zombie)) {
+            zombie.remove(); // Remove zombie on collision
+			healthPoints = healthPoints + 0.25 // Add health points
+			score = Math.trunc(score + healthPoints / 4 * zombieSpeed) // Add score
+        }
+
+		// Remove enemy if hits player and decrement health point
+		if(zombie.collides(hitbox)) {
+			zombie.remove()
+
+			background('red')
+			
+			// Change tile opacity
+			grass.opacity = 0.4
+			lSide.opacity = 0.4
+			rSide.opacity = 0.4
+			road.opacity = 0.4
+			
+			//Remove health points if ememy hits player
+			healthPoints = healthPoints -1;
+		}
+    });
+
+	// Check for projectile collision with zombies
+    humans.forEach(human => {
+        if (projectiles.overlaps(human)) {
+            human.remove(); // Remove zombie on collision
+			healthPoints = healthPoints + 0.25 // Add health points
+			score = Math.trunc(score + healthPoints / 4 * humanSpeed) // Add score
+        }
+
+		// Remove enemy if hits player and decrement health point
+		if(human.collides(hitbox)) {
+			human.remove()
+
+			background('red')
+
+			// Change tile opacity
+			grass.opacity = 0.4
+			lSide.opacity = 0.4
+			rSide.opacity = 0.4
+			road.opacity = 0.4
+
+			//Remove health points if ememy hits player
+			healthPoints = healthPoints - 1;
+		}
+    });
+
+	boss.forEach(newBoss => {
+		projectiles.forEach(projectile => {
+			if(projectile.collides(newBoss)) {
+				// Remove health points from boss
+				bossHealth = bossHealth - 1
+				// Remove boss when health is depleted
+				if(bossHealth <= 0) {
+					newBoss.remove()
+					bossHealthBar.opacity = 0
+					score = score + 1000
+				}
+				// Remove projectile after boss has been hit
+				projectile.remove()
+			}
+		})
+
+		if(newBoss.collides(hitbox)) {
+
+			background('red')
+
+			// Change tile opacity
+			grass.opacity = 0.4
+			lSide.opacity = 0.4
+			rSide.opacity = 0.4
+			road.opacity = 0.4
+
+			//Remove health points if ememy hits player
+			healthPoints = healthPoints - 1;
+		}
+	})
+}
+
+function menuScreen() {
+	background('grey')
+
+	text('Press Space To Start', width / 2, height / 2)
+	textAlign('center')
+	textSize(30)
+
+	if(kb.presses(' ')) {
+		screen = 1
+	}
+}
+
+function gameScreen() {
+	displayValues();
+
+	cursor('none')
+
+	// Change sprite opacity
+	crosshair.opacity = 1
+	player.opacity = 1
+
+	// Change tile opacity
+	grass.opacity = 1
+	lSide.opacity = 1
+	rSide.opacity = 1
+	road.opacity = 1
+
+	gunPlay();
+
+	detectCollision();
+
+	moveEnemies();
+}
+
+function endScreen() {
+	background('grey')
+
+	cursor(ARROW)
+
+	textAlign('center')
+	textSize(50)
+	text('Score', width / 2, height / 4)
+	text(score,  width / 2, height / 2)
+	textSize(30)
+	text('Reload Page To Restart', width / 2, height / 1.5 )
+
+	crosshair.opacity = 0
+	player.opacity = 0
+	ammoSprite.opacity = 0
+	zombies.remove()
+	humans.remove()
+	
+	// Change tile opacity
+	grass.opacity = 0
+	lSide.opacity = 0
+	rSide.opacity = 0
+	road.opacity = 0
 }

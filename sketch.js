@@ -1,5 +1,7 @@
 let crosshair, hitbox, zombies, humans, boss, player, enemyCount, ammoSprite, bulletCasing, bossHealthBar
 
+let gunshot, pistolReload, shotgunShot, shotgunReload, akGunshot, akReload, music1, music2, music3
+
 let map1 // Map File
 
 let road, rSide, lSide, grass // Tiles
@@ -29,7 +31,9 @@ let bossSpeed = 0.1
 let score = 0
 
 function preload() {
+	// Map
 	map1 = loadStrings('maps/map1.txt')
+	// Sprites
 	loadImage('assets/playerx64.png')
 	loadImage('assets/crosshair.png')
 	loadImage('assets/bullet.png')
@@ -42,6 +46,17 @@ function preload() {
 	loadImage('assets/road.png')
 	loadImage('assets/road-left.png')
 	loadImage('assets/road-right.png')
+	// Sounds & Music
+	soundFormats('mp3')
+	gunshot = loadSound('assets/sounds/gunshot.mp3')
+	pistolReload = loadSound('assets/sounds/pistol-reload.mp3')
+	shotgunShot = loadSound('assets/sounds/shotgun-shot.mp3')
+	shotgunReload = loadSound('assets/sounds/shotgun-reload.mp3')
+	akGunshot = loadSound('assets/sounds/ak-gunshot.mp3')
+	akReload = loadSound('assets/sounds/ak-reload.mp3')
+	music1 = loadSound('assets/sounds/palmtree-panic.mp3')
+	music2 = loadSound('assets/sounds/metalic-madness.mp3')
+	music3 = loadSound('assets/sounds/final-fever.mp3')
 }
 
 function setup() {
@@ -168,6 +183,16 @@ function setup() {
 	humans = new Group();
 
 	boss = new Group()
+
+	// Set Music Volume
+	music1.setVolume(0.35)
+	music2.setVolume(0.35)
+	music3.setVolume(0.35)
+
+	music2.loop()
+
+	shotgunShot.setVolume(0.6)
+	akGunshot.setVolume(0.4)
 }
 
 function draw() {
@@ -261,8 +286,12 @@ function starterWeapon() {
 		// Move projecile in accordance to player
 		newProjectile.x = player.x
 
+		// Gun sound
+		gunshot.play()
+
 		// Automatic Reload
 		if(ammoCount <= 0) {
+			pistolReload.play()
 			setTimeout(() => {
 				ammoCount = ammoCount + 15
 			}, 1000)
@@ -289,8 +318,12 @@ function shotgunUpgrade() {
 			newProjectile.vel.y = random(-25, -20)
 		}
 
+		// Gun sound
+		shotgunShot.play()
+
 		// Automatic Reload
 		if(ammoCount <= 0) {
+			shotgunReload.play()
 			setTimeout(() => {
 				ammoCount = ammoCount + 12
 			}, 1500)
@@ -315,8 +348,12 @@ function akUpgrade() {
 		let newProjectile = new projectiles.Sprite()
 		newProjectile.x = player.x
 
+		// Gun sound
+		akGunshot.play()
+
 		// Automatic Reload
 		if(ammoCount <= 0) {
+			akReload.play()
 			setTimeout(() => {
 				ammoCount = ammoCount + 60
 			}, 2500)
@@ -345,9 +382,12 @@ function doubleAkUpgrade() {
 		let newProjectile2 = new projectiles.Sprite()
 		newProjectile2.x = player.x + 12.5
 
+		// Gun sound
+		gunshot.play()
 
 		// Automatic Reload
 		if(ammoCount <= 0) {
+			pistolReload.play()
 			setTimeout(() => {
 				ammoCount = ammoCount + 120
 			}, 3000)

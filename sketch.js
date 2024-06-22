@@ -490,6 +490,7 @@ function detectCollision() {
 					newBoss.remove()
 					bossHealthBar.opacity = 0
 					score = score + 1000
+					healthPoints = healthPoints + 10
 				}
 			}
 		})

@@ -1,10 +1,18 @@
 let crosshair, hitbox, zombies, humans, boss, player, enemyCount, ammoSprite, bulletCasing, bossHealthBar
 
-let gunshot, pistolReload, shotgunShot, shotgunReload, akGunshot, akReload, music1, music2, music3
+let gunshot, pistolReload, shotgunShot, shotgunReload, akGunshot, akReload, music1, music2, music3 // Sounds
 
 let map1 // Map File
 
 let road, rSide, lSide, grass // Tiles
+
+let healthBox, shotgun, ak47, doubleAk47, miniGun // Upgrades
+
+let healthBoxImage, shotgunImage, ak47Image, doubleAk47Image, miniGunImage // Upgrade Images
+
+let activeWeapon = 0
+
+let randNum
 
 let screen = 0
 
@@ -57,6 +65,12 @@ function preload() {
 	music1 = loadSound('assets/sounds/palmtree-panic.mp3')
 	music2 = loadSound('assets/sounds/metalic-madness.mp3')
 	music3 = loadSound('assets/sounds/final-fever.mp3')
+	// Upgrade Sprites
+	healthBoxImage = loadImage('assets/health-box.png')
+	shotgunImage = loadImage('assets/shotgun.png')
+	ak47Image = loadImage('assets/ak.png')
+	doubleAk47Image = loadImage('assets/double-ak.png')
+	miniGunImage = loadImage('assets/minigun.png')
 }
 
 function setup() {
@@ -177,11 +191,32 @@ function setup() {
 	bulletCasing.rotation = 360;
 	bulletCasing.rotationSpeed = 10;
 
+	// Health Box
+	healthBox = new Group();
+
+	// Gun Upgrades
+
+	// Shotgun
+	shotgun = new Group();
+
+	// AK
+	ak47 = new Group();
+
+	// DoubleAK
+	doubleAk47 = new Group();
+
+	// Minigun
+	miniGun = new Group();
+
 	// Enemy Groups
+
+	// Slow Zombies
 	zombies = new Group();
 
+	// Fast Zombies
 	humans = new Group();
 
+	// Boss Zombies
 	boss = new Group()
 
 	// Set Music Volume
@@ -189,7 +224,7 @@ function setup() {
 	music2.setVolume(0.35)
 	music3.setVolume(0.35)
 
-	music2.loop()
+	// music2.loop()
 
 	shotgunShot.setVolume(0.6)
 	akGunshot.setVolume(0.4)
@@ -266,14 +301,16 @@ function gunPlay() {
 	crosshair.y = mouseY;
 
 	// Shooting mechanic
-	if(score <= 5000) {
+	if(activeWeapon == 0) {
 		starterWeapon()
-	} else if(score <= 20000) {
+	} else if(activeWeapon == 1) {
 		shotgunUpgrade()
-	} else if(score <= 100000) {
+	} else if(activeWeapon == 2) {
 		akUpgrade()
-	} else if(score >= 100000) {
+	} else if(activeWeapon == 3) {
 		doubleAkUpgrade()
+	} else if(activeWeapon == 4) {
+		minigunUpgrade()
 	}
 }
 
@@ -387,10 +424,41 @@ function doubleAkUpgrade() {
 
 		// Automatic Reload
 		if(ammoCount <= 0) {
-			pistolReload.play()
+			akReload.play()
 			setTimeout(() => {
 				ammoCount = ammoCount + 120
 			}, 3000)
+		}
+
+		spawnBulletCasing()
+	}
+}
+
+function minigunUpgrade() {
+	if(mouse.pressing() && ammoCount > 0) {
+		// Change player sprite
+		player.image = 'assets/player-minigun.png'
+
+		// Remove 3 ammo
+		ammoCount = ammoCount - 1
+
+		// Projectile
+		for (let i = 0; i < 5; i++) {
+			let newProjectile = new projectiles.Sprite()
+			newProjectile.amount = 5;
+			newProjectile.x = player.x
+			newProjectile.vel.x = random(-5, 5)
+		}
+
+		// Gun sound
+		gunshot.play()
+
+		// Automatic Reload
+		if(ammoCount <= 0) {
+			akReload.play()
+			setTimeout(() => {
+				ammoCount = ammoCount + 300
+			}, 5000)
 		}
 
 		spawnBulletCasing()
@@ -405,6 +473,18 @@ function spawnBulletCasing() {
 	newBulletCasing.x = player.x + 10
 	newBulletCasing.vel.y = -2
 	newBulletCasing.vel.x = 2	
+}
+
+function spawnUpgrades(group, count, image) {
+	for (let i = 0; i < count; i++) {
+        let upgrade = new Sprite();
+        upgrade.diameter = 50;
+        upgrade.x = random(50, width - 50);
+        upgrade.y = height / 2
+		upgrade.layer = 3
+		upgrade.image = image
+        group.add(upgrade);
+    }
 }
 
 function spawnEnemies(group, count, speed, spriteArray) {
@@ -467,7 +547,6 @@ function detectCollision() {
     zombies.forEach(zombie => {
         if (projectiles.overlaps(zombie)) {
             zombie.remove(); // Remove zombie on collision
-			healthPoints = healthPoints + 0.25 // Add health points
 			score = Math.trunc(score + healthPoints / 4 * zombieSpeed) // Add score
         }
 
@@ -492,7 +571,6 @@ function detectCollision() {
     humans.forEach(human => {
         if (projectiles.overlaps(human)) {
             human.remove(); // Remove zombie on collision
-			healthPoints = healthPoints + 0.25 // Add health points
 			score = Math.trunc(score + healthPoints / 4 * humanSpeed) // Add score
         }
 
@@ -530,7 +608,6 @@ function detectCollision() {
 					newBoss.remove()
 					bossHealthBar.opacity = 0
 					score = score + 1000
-					healthPoints = healthPoints + 10
 				}
 			}
 		})
@@ -549,6 +626,45 @@ function detectCollision() {
 			healthPoints = healthPoints - 1;
 		}
 	})
+
+	healthBox.forEach(newBox => {
+		if(projectiles.overlaps(newBox)) {
+			newBox.remove()
+			healthPoints = healthPoints + 5
+		}
+	})
+
+	shotgun.forEach(newGun => {
+		if(projectiles.overlaps(newGun)) {
+			newGun.remove()
+			activeWeapon = 1
+			player.image = 'assets/player-shotgun.png'
+		}
+	})
+
+	ak47.forEach(newGun => {
+		if(projectiles.overlaps(newGun)) {
+			newGun.remove()
+			activeWeapon = 2
+			player.image = 'assets/player-ak.png'
+		}
+	})
+
+	doubleAk47.forEach(newGun => {
+		if(projectiles.overlaps(newGun)) {
+			newGun.remove()
+			activeWeapon = 3
+			player.image = 'assets/player-doubleak.png'
+		}
+	})
+
+	miniGun.forEach(newGun => {
+		if(projectiles.overlaps(newGun)) {
+			newGun.remove()
+			activeWeapon = 4
+			player.image = 'assets/player-minigun.png'
+		}
+	})
 }
 
 function progressRound() {
@@ -565,8 +681,24 @@ function progressRound() {
 		spawnEnemies(humans, healthPoints / 8, humanSpeed, fastZombieSprites);
 		
 		// Increase speed every round
-		zombieSpeed = zombieSpeed + 0.045
-		humanSpeed = humanSpeed + 0.045
+		zombieSpeed = zombieSpeed + 0.03
+		humanSpeed = humanSpeed + 0.03
+
+		// Generate random number
+		randNum = random(1, 5)
+		if(randNum > 2 && randNum < 3) {
+			spawnUpgrades(healthBox, 1, healthBoxImage)
+		}
+
+		if(score >= 5000 && randNum > 2 && randNum < 3) {
+			spawnUpgrades(shotgun, 1, shotgunImage)
+		} else if(score >= 20000 && randNum > 2 && randNum < 3) {
+			spawnUpgrades(ak47, 1, ak47Image)
+		} else if(score >= 100000 && randNum > 2 && randNum < 3) {
+			spawnUpgrades(doubleAk47, 1, doubleAk47Image)
+		} else if(score >= 1000000 && randNum > 2 && randNum < 3) {
+			spawnUpgrades(miniGun, 1, miniGunImage)
+		}
 
 	}
 

@@ -386,7 +386,7 @@ function akUpgrade() {
 		newProjectile.x = player.x
 
 		// Gun sound
-		akGunshot.play()
+		gunshot.play()
 
 		// Automatic Reload
 		if(ammoCount <= 0) {
@@ -483,6 +483,7 @@ function spawnUpgrades(group, count, image) {
         upgrade.y = height / 2
 		upgrade.layer = 3
 		upgrade.image = image
+		upgrade.collider = 'none'
         group.add(upgrade);
     }
 }
@@ -690,14 +691,27 @@ function progressRound() {
 			spawnUpgrades(healthBox, 1, healthBoxImage)
 		}
 
+		// Generate random number
+		randNum = random(1, 5);
+
+		if(randNum > 2 && randNum < 3) {
+			spawnUpgrades(healthBox, 1, healthBoxImage);
+		}
+
 		if(score >= 5000 && randNum > 2 && randNum < 3) {
-			spawnUpgrades(shotgun, 1, shotgunImage)
-		} else if(score >= 20000 && randNum > 2 && randNum < 3) {
-			spawnUpgrades(ak47, 1, ak47Image)
-		} else if(score >= 100000 && randNum > 2 && randNum < 3) {
-			spawnUpgrades(doubleAk47, 1, doubleAk47Image)
-		} else if(score >= 1000000 && randNum > 2 && randNum < 3) {
-			spawnUpgrades(miniGun, 1, miniGunImage)
+			spawnUpgrades(shotgun, 1, shotgunImage);
+		} 
+		
+		if(score >= 20000 && randNum > 2 && randNum < 3) {
+			spawnUpgrades(ak47, 1, ak47Image);
+		} 
+		
+		if(score >= 100000 && randNum > 2 && randNum < 3) {
+			spawnUpgrades(doubleAk47, 1, doubleAk47Image);
+		} 
+		
+		if(score >= 1000000 && randNum > 2 && randNum < 3) {
+			spawnUpgrades(miniGun, 1, miniGunImage);
 		}
 
 	}

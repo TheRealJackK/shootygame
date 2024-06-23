@@ -698,19 +698,19 @@ function progressRound() {
 			spawnUpgrades(healthBox, 1, healthBoxImage);
 		}
 
-		if(score >= 5000 && randNum > 2 && randNum < 3) {
+		if(score >= 5000 && score <= 20000 && randNum > 2 && randNum < 3 && activeWeapon != 1) {
 			spawnUpgrades(shotgun, 1, shotgunImage);
 		} 
 		
-		if(score >= 20000 && randNum > 2 && randNum < 3) {
+		if(score >= 20000 && score <= 100000 && randNum > 2 && randNum < 3 && activeWeapon != 2) {
 			spawnUpgrades(ak47, 1, ak47Image);
 		} 
 		
-		if(score >= 100000 && randNum > 2 && randNum < 3) {
+		if(score >= 100000 && score <= 1000000 && randNum > 2 && randNum < 3 && activeWeapon != 3) {
 			spawnUpgrades(doubleAk47, 1, doubleAk47Image);
 		} 
 		
-		if(score >= 1000000 && randNum > 2 && randNum < 3) {
+		if(score >= 1000000 && randNum > 2 && randNum < 3 && activeWeapon != 4) {
 			spawnUpgrades(miniGun, 1, miniGunImage);
 		}
 
@@ -777,8 +777,10 @@ function endScreen() {
 	crosshair.opacity = 0
 	player.opacity = 0
 	ammoSprite.opacity = 0
+	bossHealthBar.opacity = 0
 	zombies.remove()
 	humans.remove()
+	boss.remove()
 	
 	// Change tile opacity
 	grass.opacity = 0
